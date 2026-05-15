@@ -16,7 +16,6 @@ import Settings from './pages/Settings.jsx';
 
 const AppRoutes = () => {
   const { user } = useAuth();
-
   return (
     <>
       <Navbar />
