@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from './Avatar.jsx';
 import HeartButton from './HeartButton.jsx';
 import CommentSection from './CommentSection.jsx';
-import { timeAgo, getYouTubeEmbed, hasHearted } from '../utils/helpers.js';
+import { timeAgo, getYouTubeEmbed, hasHearted } from '../utils/helper.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';

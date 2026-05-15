@@ -1,5 +1,5 @@
 
-import { getInitials } from "../utils/helpers.js";
+import { getInitials } from "../utils/helper.js";
 
 const Avatar = ({ name = "", src = "", size = 36 }) => {
   if (src) {

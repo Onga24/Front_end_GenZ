@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Avatar from './Avatar.jsx';
 import HeartButton from './HeartButton.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
-import { timeAgo, hasHearted } from '../utils/helpers.js';
+import { timeAgo, hasHearted } from '../utils/helper.js';
 import api from '../utils/api.js';
 import toast from 'react-hot-toast';
 
