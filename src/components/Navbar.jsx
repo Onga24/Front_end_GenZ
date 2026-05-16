@@ -32,7 +32,7 @@ const Navbar = () => {
     >
       <NavLink to="/" className="navbar-brand">
         {/* Message<span>Board</span> */}
-        العبرحيمي <span>العالم </span>
+        العالم <span> العبرحيمي</span>
       </NavLink>
 
       <div className="navbar-links">
