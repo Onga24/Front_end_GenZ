@@ -352,6 +352,25 @@ import toast from 'react-hot-toast';
 
 // ─── Media Type Detection (mirrors migrate.js logic) ─────────────────────────
 // Used as a client-side fallback if mediaType from DB is missing or 'none'.
+// function detectMediaType(url) {
+//   if (!url) return 'none';
+
+//   const lower = url.toLowerCase();
+
+//   if (lower.includes('youtube.com') || lower.includes('youtu.be')) return 'youtube';
+//   if (/\.(jpeg|jpg|gif|png|webp)(\?|$)/i.test(url)) return 'image';
+//   if (/\.(mp4|mov|avi|mkv|webm)(\?|$)/i.test(url)) return 'video';
+//   if (/\.pdf(\?|$)/i.test(url)) return 'pdf';
+
+//   if (lower.includes('drive.google.com')) {
+//     if (lower.includes('pdf'))   return 'pdf';
+//     if (lower.includes('video') || lower.includes('mp4') || lower.includes('mov')) return 'video';
+//     if (lower.includes('image') || lower.includes('jpg') || lower.includes('png')) return 'image';
+//     return 'image'; // default Drive → image (same as migrate.js)
+//   }
+
+//   return 'image';
+// }
 function detectMediaType(url) {
   if (!url) return 'none';
 
@@ -363,19 +382,35 @@ function detectMediaType(url) {
   if (/\.pdf(\?|$)/i.test(url)) return 'pdf';
 
   if (lower.includes('drive.google.com')) {
-    if (lower.includes('pdf'))   return 'pdf';
+    if (lower.includes('pdf')) return 'pdf';
     if (lower.includes('video') || lower.includes('mp4') || lower.includes('mov')) return 'video';
-    if (lower.includes('image') || lower.includes('jpg') || lower.includes('png')) return 'image';
-    return 'image'; // default Drive → image (same as migrate.js)
+
+    // ✅ /file/d/ links with no extension clue → default to image
+    // thumbnail API will serve it correctly if it's an image
+    return 'image';
   }
 
   return 'image';
 }
-
 // ─── Google Drive URL Transformer ────────────────────────────────────────────
 // - image → /thumbnail (public, no Google login required — fixes 403)
 // - video → /preview   (iframe embed)
 // - pdf   → /preview   (iframe embed)
+// function getDirectDriveUrl(url, type = 'image') {
+//   if (!url || !url.includes('drive.google.com')) return url;
+
+//   const idMatch = url.match(/(?:\/d\/|id=)([\w-]+)/);
+//   if (!idMatch?.[1]) return url;
+
+//   const fileId = idMatch[1];
+
+//   if (type === 'video' || type === 'pdf') {
+//     return `https://drive.google.com/file/d/${fileId}/preview`;
+//   }
+
+//   // Thumbnail API — public, no auth needed
+//   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+// }
 function getDirectDriveUrl(url, type = 'image') {
   if (!url || !url.includes('drive.google.com')) return url;
 
@@ -388,10 +423,10 @@ function getDirectDriveUrl(url, type = 'image') {
     return `https://drive.google.com/file/d/${fileId}/preview`;
   }
 
-  // Thumbnail API — public, no auth needed
+  // ✅ Always use thumbnail for images — works for ALL /file/d/ links
+  // including https://drive.google.com/file/d/FILE_ID/view?usp=drive_link
   return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
 }
-
 // ─── Icons ────────────────────────────────────────────────────────────────────
 const EditIcon = () => (
   <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
