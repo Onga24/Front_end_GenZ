@@ -26,7 +26,7 @@ const ForgotPassword = () => {
     if (!email.trim()) return toast.error('Enter your email');
     setLoading(true);
     try {
-      await api.post('/api/auth/forgot-password', { email });
+      await api.post('/auth/forgot-password', { email });
       toast.success('Check your email for the OTP code!');
       setStep(1);
     } catch (err) {
@@ -63,7 +63,7 @@ const ForgotPassword = () => {
     if (code.length !== 6) return toast.error('Enter the full 6-digit code');
     setLoading(true);
     try {
-      const res = await api.post('/api/auth/verify-otp', { email, code });
+      const res = await api.post('/auth/verify-otp', { email, code });
       setResetToken(res.data.resetToken);
       toast.success('OTP verified!');
       setStep(2);
@@ -79,7 +79,7 @@ const ForgotPassword = () => {
     if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
     setLoading(true);
     try {
-      const res = await api.post('/api/auth/reset-password', { resetToken, newPassword });
+      const res = await api.post('/auth/reset-password', { resetToken, newPassword });
       login(res.data.token, res.data.user);
       toast.success('Password set! Welcome 🎉');
       navigate(res.data.user.role === 'admin' ? '/admin' : '/dashboard');
