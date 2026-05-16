@@ -34,23 +34,95 @@ import toast from 'react-hot-toast';
   
 //   return url;
 // };
-const getDirectDriveUrl = (url) => {
-  if (!url || !url.includes('drive.google.com')) return url;
+// const getDirectDriveUrl = (url) => {
+//   if (!url || !url.includes('drive.google.com')) return url;
 
-  // Extract File ID
-  const idMatch = url.match(/(?:\/d\/|id=)([\w-]+)/);
-  if (!idMatch || !idMatch[1]) return url;
+//   // Extract File ID
+//   const idMatch = url.match(/(?:\/d\/|id=)([\w-]+)/);
+//   if (!idMatch || !idMatch[1]) return url;
   
-  const fileId = idMatch[1];
+//   const fileId = idMatch[1];
 
-  // For Videos: We use the /preview link because Google Drive videos 
-  // often require a specific player to handle streaming/buffering.
- if (url.toLowerCase().includes('pdf') || url.includes('/file/d/')) {
-    return `https://drive.google.com/file/d/${fileId}/preview`;
+//   // For Videos: We use the /preview link because Google Drive videos 
+//   // often require a specific player to handle streaming/buffering.
+//  if (url.toLowerCase().includes('pdf') || url.includes('/file/d/')) {
+//     return `https://drive.google.com/file/d/${fileId}/preview`;
+//   }
+
+//   // For Images: We use the uc (user content) link
+//   return `https://drive.google.com/uc?export=view&id=${fileId}`;
+// };
+const MediaRenderer = ({ url, type }) => {
+  if (!url || type === 'none') return null;
+
+  // YouTube
+  if (type === 'youtube') {
+    const embedUrl = getYouTubeEmbed(url);
+    if (!embedUrl) return null;
+    return (
+      <div className="post-media">
+        <iframe
+          src={embedUrl}
+          title="YouTube video"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
   }
 
-  // For Images: We use the uc (user content) link
-  return `https://drive.google.com/uc?export=view&id=${fileId}`;
+  // Video
+  if (type === 'video') {
+    const videoUrl = getDirectDriveUrl(url, 'video');
+    return (
+      <div className="post-media">
+        <iframe
+          src={videoUrl}
+          width="100%"
+          height="350"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          title="Video"
+          style={{ border: 'none', borderRadius: '8px' }}
+        />
+      </div>
+    );
+  }
+
+  // PDF
+  if (type === 'pdf') {
+    const pdfUrl = getDirectDriveUrl(url, 'pdf');
+    return (
+      <div className="post-media pdf-container">
+        <iframe
+          src={pdfUrl}
+          width="100%"
+          height="500px"
+          title="PDF Document"
+          style={{ border: 'none', borderRadius: '8px' }}
+        />
+        <div style={{ marginTop: '8px' }}>
+          <a href={url} target="_blank" rel="noreferrer" className="download-btn">
+            View / Download PDF
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  // Image (default)
+  const imageUrl = getDirectDriveUrl(url, 'image');
+  return (
+    <div className="post-media">
+      <img
+        src={imageUrl}
+        alt="Post media"
+        loading="lazy"
+        referrerPolicy="no-referrer"
+        onError={(e) => { e.target.style.display = 'none'; }}
+      />
+    </div>
+  );
 };
 const EditIcon = () => (
   <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -96,141 +168,141 @@ const EditIcon = () => (
 //     </div>
 //   );
 // };
-const MediaRenderer = ({ url, type }) => {
-  if (!url || type === 'none') return null;
+// const MediaRenderer = ({ url, type }) => {
+//   if (!url || type === 'none') return null;
 
-  // Transform Google Drive links if necessary
-  const processedUrl = getDirectDriveUrl(url);
+//   // Transform Google Drive links if necessary
+//   const processedUrl = getDirectDriveUrl(url);
 
-  if (type === 'youtube') {
-    const embedUrl = getYouTubeEmbed(url); // YouTube logic remains the same
-    if (!embedUrl) return null;
-    return (
-      <div className="post-media">
-        <iframe
-          src={embedUrl}
-          title="YouTube video"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
-    );
-  }
-  // if (type === 'video') {
-  //   if (url.includes('drive.google.com')) {
-  //     const drivePreview = getDirectDriveUrl(url);
-  //     return (
-  //       <div className="post-media">
-  //         <iframe
-  //           src={drivePreview}
-  //           width="100%"
-  //           height="350"
-  //           allow="autoplay"
-  //           title="Drive Video"
-  //         />
-  //       </div>
-  //     );
-  //   }
-  //   return (
-  //     <div className="post-media">
-  //       <video controls style={{ width: '100%', maxHeight: 400 }}>
-  //         <source src={url} />
-  //         Your browser does not support video.
-  //       </video>
-  //     </div>
-  //   );
-  // }
-
-  if (type === 'video' && url.includes('drive.google.com')) {
-  const drivePreview = getDirectDriveUrl(url);
-  return (
-    <div className="post-media">
-      <iframe
-        src={drivePreview}
-        width="100%"
-        height="350"
-        allow="autoplay; encrypted-media"
-        allowFullScreen
-        title="Drive Video"
-        style={{ border: 'none', borderRadius: '8px' }}
-      />
-    </div>
-  );
-}
-if (type === 'pdf') {
-    // If it's a Drive link, use the preview mode
-    const pdfUrl = url.includes('drive.google.com') 
-      ? processedUrl.replace('/uc?export=view&id=', '/file/d/') + '/preview'
-      : processedUrl;
-
-    return (
-      <div className="post-media pdf-container">
-        <iframe
-          src={pdfUrl}
-          width="100%"
-          height="500px"
-          title="PDF Document"
-          style={{ border: 'none', borderRadius: '8px' }}
-        />
-        <div style={{ marginTop: '8px' }}>
-          <a href={url} target="_blank" rel="noreferrer" className="download-btn">
-            view / Download PDF
-          </a>
-        </div>
-      </div>
-    );
-  }
-
-  // default to image
-  return (
-    <div className="post-media">
-      <img src={processedUrl} alt="Post" referrerPolicy="no-referrer" />
-    </div>
-  );
-  // 4. Handle Image (Google Drive or direct)
-  const imageUrl = getDirectDriveUrl(url);
-  return (
-    <div className="post-media">
-      <img 
-        src={imageUrl} 
-        alt="Post media" 
-        loading="lazy" 
-        referrerPolicy="no-referrer"
-        onError={(e) => {
-          // If the direct link fails, hide the broken image icon
-          e.target.style.display = 'none';
-        }}
-      />
-    </div>
-  );
-
-//   if (type === 'video') {
+//   if (type === 'youtube') {
+//     const embedUrl = getYouTubeEmbed(url); // YouTube logic remains the same
+//     if (!embedUrl) return null;
 //     return (
 //       <div className="post-media">
-//         <video controls style={{ width: '100%', maxHeight: 400 }}>
-//           <source src={processedUrl} />
-//           Your browser does not support video.
-//         </video>
+//         <iframe
+//           src={embedUrl}
+//           title="YouTube video"
+//           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+//           allowFullScreen
+//         />
 //       </div>
 //     );
 //   }
-// return (
-//   <div className="post-media">
-//     <img 
-//       src={processedUrl} 
-//       alt="Post media" 
-//       loading="lazy" 
-//       referrerPolicy="no-referrer" 
-//     />
-//   </div>
-// );
-  // image (default)
-  // return (
-  //   <div className="post-media">
-  //     <img src={processedUrl} alt="Post media" loading="lazy" />
-  //   </div>
-  // );
-};
+//   // if (type === 'video') {
+//   //   if (url.includes('drive.google.com')) {
+//   //     const drivePreview = getDirectDriveUrl(url);
+//   //     return (
+//   //       <div className="post-media">
+//   //         <iframe
+//   //           src={drivePreview}
+//   //           width="100%"
+//   //           height="350"
+//   //           allow="autoplay"
+//   //           title="Drive Video"
+//   //         />
+//   //       </div>
+//   //     );
+//   //   }
+//   //   return (
+//   //     <div className="post-media">
+//   //       <video controls style={{ width: '100%', maxHeight: 400 }}>
+//   //         <source src={url} />
+//   //         Your browser does not support video.
+//   //       </video>
+//   //     </div>
+//   //   );
+//   // }
+
+//   if (type === 'video' && url.includes('drive.google.com')) {
+//   const drivePreview = getDirectDriveUrl(url);
+//   return (
+//     <div className="post-media">
+//       <iframe
+//         src={drivePreview}
+//         width="100%"
+//         height="350"
+//         allow="autoplay; encrypted-media"
+//         allowFullScreen
+//         title="Drive Video"
+//         style={{ border: 'none', borderRadius: '8px' }}
+//       />
+//     </div>
+//   );
+// }
+// if (type === 'pdf') {
+//     // If it's a Drive link, use the preview mode
+//     const pdfUrl = url.includes('drive.google.com') 
+//       ? processedUrl.replace('/uc?export=view&id=', '/file/d/') + '/preview'
+//       : processedUrl;
+
+//     return (
+//       <div className="post-media pdf-container">
+//         <iframe
+//           src={pdfUrl}
+//           width="100%"
+//           height="500px"
+//           title="PDF Document"
+//           style={{ border: 'none', borderRadius: '8px' }}
+//         />
+//         <div style={{ marginTop: '8px' }}>
+//           <a href={url} target="_blank" rel="noreferrer" className="download-btn">
+//             view / Download PDF
+//           </a>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   // default to image
+//   return (
+//     <div className="post-media">
+//       <img src={processedUrl} alt="Post" referrerPolicy="no-referrer" />
+//     </div>
+//   );
+//   // 4. Handle Image (Google Drive or direct)
+//   const imageUrl = getDirectDriveUrl(url);
+//   return (
+//     <div className="post-media">
+//       <img 
+//         src={imageUrl} 
+//         alt="Post media" 
+//         loading="lazy" 
+//         referrerPolicy="no-referrer"
+//         onError={(e) => {
+//           // If the direct link fails, hide the broken image icon
+//           e.target.style.display = 'none';
+//         }}
+//       />
+//     </div>
+//   );
+
+// //   if (type === 'video') {
+// //     return (
+// //       <div className="post-media">
+// //         <video controls style={{ width: '100%', maxHeight: 400 }}>
+// //           <source src={processedUrl} />
+// //           Your browser does not support video.
+// //         </video>
+// //       </div>
+// //     );
+// //   }
+// // return (
+// //   <div className="post-media">
+// //     <img 
+// //       src={processedUrl} 
+// //       alt="Post media" 
+// //       loading="lazy" 
+// //       referrerPolicy="no-referrer" 
+// //     />
+// //   </div>
+// // );
+//   // image (default)
+//   // return (
+//   //   <div className="post-media">
+//   //     <img src={processedUrl} alt="Post media" loading="lazy" />
+//   //   </div>
+//   // );
+// };
 const PostCard = ({ post: initialPost, onUpdate }) => {
   const { user } = useAuth();
   const [post, setPost] = useState(initialPost);

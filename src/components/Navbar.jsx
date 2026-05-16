@@ -31,7 +31,8 @@ const Navbar = () => {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
       <NavLink to="/" className="navbar-brand">
-        Message<span>Board</span>
+        {/* Message<span>Board</span> */}
+        العبرحيمي <span>العالم </span>
       </NavLink>
 
       <div className="navbar-links">
